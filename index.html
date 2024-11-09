@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>To DO</title>
+        <style>
+            /* General Styling */
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f0f8ff; /* Light blue background */
+                color: #333; /* Dark text color */
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            /* Header Styling */
+            h1 {
+                color: #1e90ff; /* Blue color for header */
+                text-align: center;
+                font-size: 2.5em;
+                margin-top: 20px;
+            }
+
+            /* Todo List Container Styling */
+            ul {
+                list-style-type: none;
+                padding: 0;
+                width: 100%;
+                max-width: 600px;
+                margin: 20px auto;
+                background-color: #ffffff; /* White background for todo container */
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Todo Item Styling */
+            li {
+                display: flex;
+                justify-content: space-between; /* Ensure buttons are on opposite sides */
+                align-items: center;
+                padding: 12px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            li:last-child {
+                border-bottom: none;
+            }
+
+            li input[type="checkbox"] {
+                margin-right: 10px;
+            }
+
+            /* Strike-through styling for completed tasks */
+            li span {
+                font-size: 1em;
+            }
+
+            li span[style="text-decoration: line-through"] {
+                color: #a0a0a0;
+            }
+
+            /* Align edit and delete buttons */
+            li a {
+                text-decoration: none;
+                font-size: 0.9em;
+                color: #1e90ff;
+                padding-left: 10px;
+            }
+
+            li a.delete-link {
+                color: #ff6347; /* Red color for delete */
+            }
+
+            /* Edit and Delete buttons spacing */
+            li .buttons {
+                display: flex;
+                gap: 10px;
+            }
+
+            /* Form Styling */
+            form {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            form input[type="text"] {
+                width: 60%;
+                padding: 10px;
+                border: 1px solid #d0d0d0;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+
+            form input[type="datetime-local"] {
+                width: 25%;
+                padding: 10px;
+                border: 1px solid #d0d0d0;
+                border-radius: 4px;
+                margin-right: 10px;
+            }
+
+            form button {
+                background-color: #1e90ff; /* Blue button */
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1em;
+            }
+
+            form button:hover {
+                background-color: #1c86ee;
+            }
+        </style>
+        <script>
+            // JavaScript function to handle the alarm for a task
+            function setAlarm(time, task) {
+                let alarmTime = new Date(time);
+                let currentTime = new Date();
+                
+                if (alarmTime > currentTime) {
+                    let timeDifference = alarmTime - currentTime;
+                    setTimeout(() => {
+                        alert("Reminder: " + task);
+                    }, timeDifference);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <h1>Todos</h1>
+        <ul>
+            {% for todo in todos %}
+            <li>
+                <input type="checkbox" name="done"{% if todo['done'] %} checked {% endif %} onchange="this.form.submit()">
+                <span {% if todo['done'] %} style="text-decoration: line-through" {% endif %}>
+                    {{ todo['task'] }}
+                </span>
+                {% if todo['alarm'] %}
+                    <span>Alarm set for: {{ todo['alarm'] }}</span>
+                {% endif %}
+                <div class="buttons">
+                    <a href="{{ url_for('edit', index=loop.index0)}}" class="edit-link">EDIT</a>
+                    <a href="{{ url_for('delete', index=loop.index0)}}" class="delete-link">DELETE</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <form action="{{ url_for('add') }}" method="post">
+            <input type="text" name="todo" placeholder="Enter task">
+            <input type="datetime-local" name="alarm">
+            <button type="submit"> ADD TODO</button>
+        </form>
+
+        <script>
+            // If there are any tasks with alarms, set their alarms
+            {% for todo in todos %}
+                {% if todo['alarm'] %}
+                    setAlarm("{{ todo['alarm'] }}", "{{ todo['task'] }}");
+                {% endif %}
+            {% endfor %}
+        </script>
+    </body>
+</html>
